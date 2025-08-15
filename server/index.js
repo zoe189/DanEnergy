@@ -1,23 +1,27 @@
+require('dotenv').config({ path: __dirname + '/../.env' });
+
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
-
-dotenv.config();
-
-const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes'); // import your user routes
 
 const app = express();
-app.use(cors());
+
+// Middleware to parse JSON request bodies
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
-
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("MongoDB Connected");
-        app.listen(process.env.PORT, () =>
-            console.log(`Server running on port ${process.env.PORT}`)
-        );
-    })
-    .catch(err => console.log(err));
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Mount user routes
+app.use('/api/users', userRoutes);
+
+// Simple route to test server
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
